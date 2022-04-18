@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.IO;
 
 public class StartContoller : MonoBehaviour
 {
@@ -98,6 +99,7 @@ public class StartContoller : MonoBehaviour
     void PressStart()
     {
         print("Start");
+        WriteString();
     }
 
     void UpdateCreateFortText()
@@ -217,5 +219,18 @@ public class StartContoller : MonoBehaviour
 
     #endregion
 
-   
+    #region Functions - Map Generation
+
+    static void WriteString()
+    {
+        string path = "Assets/Save/Map.txt";
+
+        //Write some text to the test.txt file
+        StreamWriter writer = new StreamWriter(path, true);
+        writer.WriteLine("Need To Work This Still");
+        writer.Close();
+    }
+
+    #endregion
+
 }
