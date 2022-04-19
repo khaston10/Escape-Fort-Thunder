@@ -28,7 +28,9 @@ public class StartContoller : MonoBehaviour
     public GameObject newGamePanel;
     public Text newGameDescriptionText;
     public Text newGameValueText;
-    int fortSize = 5000;
+    MapCreator mapCreator;
+    string[] map;
+    int fortSize = 500;
     int fortHostility = 5;
     int lootPercentage = 10;
 
@@ -77,8 +79,8 @@ public class StartContoller : MonoBehaviour
 
     void PressFortSize()
     {
-        if (fortSize < 10000) fortSize += 1000;
-        else fortSize = 1000;
+        if (fortSize < 1000) fortSize += 100;
+        else fortSize = 500;
         UpdateCreateFortText();
     }
 
@@ -98,8 +100,8 @@ public class StartContoller : MonoBehaviour
 
     void PressStart()
     {
-        print("Start");
-        WriteString();
+        print("Creating Map...");
+        CreateNewMap();
     }
 
     void UpdateCreateFortText()
@@ -221,14 +223,13 @@ public class StartContoller : MonoBehaviour
 
     #region Functions - Map Generation
 
-    static void WriteString()
+    void CreateNewMap()
     {
-        string path = "Assets/Save/Map.txt";
+        // Create custom object - Map Creator.
+        mapCreator = new MapCreator(fortSize, fortHostility, lootPercentage, "Assets/Save/Map.txt");
 
-        //Write some text to the test.txt file
-        StreamWriter writer = new StreamWriter(path, true);
-        writer.WriteLine("Need To Work This Still");
-        writer.Close();
+        // Write the map to save file.
+        mapCreator.CreateMap();
     }
 
     #endregion
