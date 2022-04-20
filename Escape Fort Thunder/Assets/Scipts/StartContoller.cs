@@ -9,7 +9,7 @@ public class StartContoller : MonoBehaviour
     #region Variables - Buttons
     enum SelectionSate : int
     {
-        StartGame, CreatFort,
+        StartGame, CreatFort, EnterSeed
     }
 
     SelectionSate currentSelectionState;
@@ -17,6 +17,7 @@ public class StartContoller : MonoBehaviour
 
     public Button[] startGameButtons;
     public Button[] createFortButtons;
+    public Button[] seedButtons;
 
 
     List<Button[]> selectionButtons = new List<Button[]>();
@@ -26,13 +27,17 @@ public class StartContoller : MonoBehaviour
     #region Variables - Panels and Text
 
     public GameObject newGamePanel;
-    public Text newGameDescriptionText;
-    public Text newGameValueText;
     MapCreator mapCreator;
     string[] map;
-    int fortSize = 500;
-    int fortHostility = 5;
-    int lootPercentage = 10;
+
+    public GameObject seedPanel;
+    public Text seed1000sText;
+    public Text seed100sText;
+    public Text seed10sText;
+    public Text seed1sText;
+    readonly string acceptableSeedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    int[] seedIndices = new int[] {0, 0, 0, 0};
+    string seedString = "0000";
 
     #endregion
 
@@ -44,12 +49,14 @@ public class StartContoller : MonoBehaviour
         // Initialize the selectionButtons array.
         selectionButtons.Add(startGameButtons);
         selectionButtons.Add(createFortButtons);
+        selectionButtons.Add(seedButtons);
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        // Get Keyboard Inputs (This is for developement and can be removed fo mobile release)
+        PressKeyboardKey();
     }
 
     #region Functions - Buttons - StartGame
@@ -57,10 +64,9 @@ public class StartContoller : MonoBehaviour
     void PressNewGame()
     {
         newGamePanel.SetActive(true);
-        selctionIndex = 3;
+        selctionIndex = 1;
         currentSelectionState = SelectionSate.CreatFort;
-        selectionButtons[((int)currentSelectionState)][selctionIndex].Select();
-        UpdateCreateFortText();
+        SelectCurrentButton();
     }
 
     void PressLoadGame()
@@ -77,74 +83,111 @@ public class StartContoller : MonoBehaviour
 
     #region Functions - Buttons - CreateFort
 
-    void PressFortSize()
-    {
-        if (fortSize < 1000) fortSize += 100;
-        else fortSize = 500;
-        UpdateCreateFortText();
-    }
-
-    void PressFortHostility()
-    {
-        if (fortHostility < 10) fortHostility += 1;
-        else fortHostility = 1;
-        UpdateCreateFortText();
-    }
-
-    void PressLootPercentage()
-    {
-        if (lootPercentage < 100) lootPercentage += 10;
-        else lootPercentage = 10;
-        UpdateCreateFortText();
-    }
-
     void PressStart()
     {
-        print("Creating Map...");
         CreateNewMap();
     }
 
-    void UpdateCreateFortText()
+    void PressSeed()
     {
-        if (selctionIndex == 3)
-        {
-            newGameDescriptionText.text = "Fort Size";
-            newGameValueText.text = fortSize.ToString();
-        }
-
-        else if (selctionIndex == 2)
-        {
-            newGameDescriptionText.text = "Fort Hostility";
-            newGameValueText.text = fortHostility.ToString();
-        }
-
-        else if (selctionIndex == 1)
-        {
-            newGameDescriptionText.text = "Loot Percentage";
-            newGameValueText.text = lootPercentage.ToString() + "%";
-        }
-
-        else if (selctionIndex == 0)
-        {
-            newGameDescriptionText.text = "Start";
-            newGameValueText.text = "";
-        }
-
-
+        currentSelectionState = SelectionSate.EnterSeed;
+        selctionIndex = 0;
+        newGamePanel.SetActive(false);
+        seedPanel.SetActive(true);
+        SelectCurrentButton();
     }
 
     void BackToStartGameState()
     {
         currentSelectionState = SelectionSate.StartGame;
         selctionIndex = 2;
-        selectionButtons[((int)currentSelectionState)][selctionIndex].Select();
+        SelectCurrentButton();
         newGamePanel.SetActive(false);
 
     }
 
     #endregion
 
+    #region Functions - Buttons - Enter Seed
+
+    void UpdateSeedText()
+    {
+        seed1000sText.text = acceptableSeedChars[seedIndices[0]].ToString();
+        seed100sText.text = acceptableSeedChars[seedIndices[1]].ToString();
+        seed10sText.text = acceptableSeedChars[seedIndices[2]].ToString();
+        seed1sText.text = acceptableSeedChars[seedIndices[3]].ToString();
+    }
+
+    void PressSeedButton()
+    {
+        if (seedIndices[selctionIndex] < acceptableSeedChars.Length - 1) seedIndices[selctionIndex] += 1;
+        else seedIndices[selctionIndex] = 0;
+        UpdateSeedText();
+        SelectCurrentButton();
+    }
+
+    void BackToCreateFortState()
+    {
+        currentSelectionState = SelectionSate.CreatFort;
+        selctionIndex = 0;
+        SelectCurrentButton();
+        seedPanel.SetActive(false);
+        newGamePanel.SetActive(true);
+    }
+
+    void StartFromSeed()
+    {
+        seedString = "";
+        for (int i = 0; i < seedIndices.Length; i++)
+        {
+            seedString += acceptableSeedChars[seedIndices[i]].ToString();
+        }
+
+        CreateNewMap();
+    }
+
+    #endregion
+
     #region Functions - Main Controller
+
+    public void SelectCurrentButton()
+    {
+        selectionButtons[((int)currentSelectionState)][selctionIndex].Select();
+    }
+
+    public void PressKeyboardKey()
+    {
+        // (This is for developement and can be removed fo mobile release)
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            PressUp();
+        }
+
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            PressDown();
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            PressLeft();
+        }
+
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            PressRight();
+        }
+
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            PressA();
+        }
+
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            PressB();
+        }
+    }
 
     void IncreaseDecreaseSelectionIndex(bool forward)
     {
@@ -180,12 +223,20 @@ public class StartContoller : MonoBehaviour
 
         else if (currentSelectionState == SelectionSate.CreatFort)
         {
-            if (selctionIndex == 0) PressStart();
-            else if (selctionIndex == 1) PressLootPercentage();
-            else if (selctionIndex == 2) PressFortHostility();
-            else if (selctionIndex == 3) PressFortSize();
-            UpdateCreateFortText();
-            selectionButtons[((int)currentSelectionState)][selctionIndex].Select();
+            if (selctionIndex == 0) PressSeed();
+            else if (selctionIndex == 1) PressStart();
+
+            if (selctionIndex != 0)
+            {
+                SelectCurrentButton();
+            }
+            
+        }
+
+        else if (currentSelectionState == SelectionSate.EnterSeed)
+        {
+            if (selctionIndex == 4) StartFromSeed();
+            else PressSeedButton();
         }
     }
 
@@ -195,28 +246,58 @@ public class StartContoller : MonoBehaviour
         {
             BackToStartGameState();
         }
+
+        else if (currentSelectionState == SelectionSate.EnterSeed)
+        {
+            BackToCreateFortState();
+        }
     }
 
     public void PressUp()
     {
-        IncreaseDecreaseSelectionIndex(true);
-        selectionButtons[((int)currentSelectionState)][selctionIndex].Select();
-
-        if (currentSelectionState == SelectionSate.CreatFort)
+        if (currentSelectionState == SelectionSate.StartGame || currentSelectionState == SelectionSate.CreatFort)
         {
-            UpdateCreateFortText();
+            IncreaseDecreaseSelectionIndex(true);
+            SelectCurrentButton();
+
         }
+
+        SelectCurrentButton();
     }
 
     public void PressDown()
     {
-        IncreaseDecreaseSelectionIndex(false);
-        selectionButtons[((int)currentSelectionState)][selctionIndex].Select();
 
-        if (currentSelectionState == SelectionSate.CreatFort)
+        if (currentSelectionState == SelectionSate.StartGame || currentSelectionState == SelectionSate.CreatFort)
         {
-            UpdateCreateFortText();
+            IncreaseDecreaseSelectionIndex(false);
+            SelectCurrentButton();
         }
+
+        SelectCurrentButton();
+    }
+
+    public void PressLeft()
+    {
+        if (currentSelectionState == SelectionSate.EnterSeed)
+        {
+            IncreaseDecreaseSelectionIndex(false);
+            SelectCurrentButton();
+        }
+
+        SelectCurrentButton();
+
+    }
+
+    public void PressRight()
+    {
+        if (currentSelectionState == SelectionSate.EnterSeed)
+        {
+            IncreaseDecreaseSelectionIndex(true);
+            SelectCurrentButton();
+        }
+
+        SelectCurrentButton();
     }
 
     #endregion
@@ -226,7 +307,7 @@ public class StartContoller : MonoBehaviour
     void CreateNewMap()
     {
         // Create custom object - Map Creator.
-        mapCreator = new MapCreator(fortSize, fortHostility, lootPercentage, "Assets/Save/Map.txt");
+        mapCreator = new MapCreator("Assets/Save/Map.txt", seedString);
 
         // Write the map to save file.
         mapCreator.CreateMap();
